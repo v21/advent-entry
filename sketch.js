@@ -149,5 +149,12 @@ function mouseReleased() {
     days[today].mouseReleased();
 }
 
-keyPressed = () => days[today].keyPressed();
-keyReleased = () => days[today].keyReleased();
+function keyPressed() {
+
+    if (!homepage.visible || (homepage.visible && homepage.doorOpen)) days[today].keyPressed();
+}
+
+function keyReleased() {
+
+    if (!homepage.visible || (homepage.visible && homepage.doorOpen)) days[today].keyReleased();
+}

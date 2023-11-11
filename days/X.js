@@ -47,4 +47,13 @@ class DayX extends Day {
     keyReleased() {
 
     }
+
+    // Below is the basic setup for a nested class. This can be deleted or renamed
+
+    HelperClass = class {
+
+        constructor() {
+
+        }
+    }
 }

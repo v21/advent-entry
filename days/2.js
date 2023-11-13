@@ -2,7 +2,7 @@
 
 function day2Preload() {
 
-    assets.day2SnowmanFace = loadImage("../assets/day2-snowman-face.png");
+    assets.day2SnowmanFace = loadImage("../assets/day2/snowman-face.png");
 }
 
 class Day2 extends Day {

@@ -21,6 +21,7 @@ function preload() {
 function setup() {
 
     canvas = createCanvas(700, 700);
+    canvas.parent("canvas-wrapper");
     noLoopCanvas = createGraphics(width, height);
 
     body = select("body");

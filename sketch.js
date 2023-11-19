@@ -24,6 +24,12 @@ function setup() {
     canvas.parent("canvas-wrapper");
     noLoopCanvas = createGraphics(width, height);
 
+    resetModes();
+
+    allSprites.autoDraw = false;
+    allSprites.autoUpdate = false;
+    world.autoStep = false;
+
     body = select("body");
     controlsText = select("#controls");
     creditsText = select("#credits");
@@ -50,6 +56,8 @@ function draw() {
             push();
             days[today].update();
             pop();
+            autoPlayP5Play();
+            resetModes();
         } else if (homepage.enteringDoor || homepage.exitingDoor) {
             image(noLoopCanvas, 0, 0, width, height);
         }
@@ -61,6 +69,7 @@ function draw() {
     }
 
     updatePageBackground();
+    resetModes();
 }
 
 function createDays() {
@@ -77,11 +86,14 @@ function changeDay(date) {
 
     today = date;
 
+    resetP5Play();
+
     clear();
 
     push();
     days[today].prerun();
     pop();
+    resetModes();
 
     if (!days[today].loop) {
         push();
@@ -89,6 +101,36 @@ function changeDay(date) {
         pop();
         noLoopCanvas.image(canvas, 0, 0, width, height);
     }
+}
+
+function resetModes() {
+
+    colorMode(RGB, 255);
+    ellipseMode(CENTER);
+    rectMode(CORNER);
+    blendMode(BLEND);
+    imageMode(CORNER);
+    angleMode(RADIANS);
+    textureMode(IMAGE);
+}
+
+function autoPlayP5Play() {
+
+    if (days[today].autoPlayP5Play) {
+        camera.on();
+        allSprites.draw();
+        world.step()
+        allSprites.update();
+        camera.off();
+    }
+}
+
+function resetP5Play() {
+
+    allSprites.removeAll();
+    world.gravity.x = 0;
+    world.gravity.y = 0;
+    world.allowSleeping = true;
 }
 
 function setupGrammar(grammarSource) {

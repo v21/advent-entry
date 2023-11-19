@@ -26,9 +26,9 @@ function setup() {
 
     resetModes();
 
-    allSprites.autoDraw = false;
-    allSprites.autoUpdate = false;
-    world.autoStep = false;
+    // allSprites.autoDraw = false;
+    // allSprites.autoUpdate = false;
+    // world.autoStep = false;
 
     body = select("body");
     controlsText = select("#controls");
@@ -116,6 +116,8 @@ function resetModes() {
 
 function autoPlayP5Play() {
 
+    return;
+
     if (days[today].autoPlayP5Play) {
         camera.on();
         allSprites.draw();
@@ -126,6 +128,8 @@ function autoPlayP5Play() {
 }
 
 function resetP5Play() {
+
+    return;
 
     allSprites.removeAll();
     world.gravity.x = 0;

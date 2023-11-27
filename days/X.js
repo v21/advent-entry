@@ -7,6 +7,10 @@ function dayXPreload() {
 
 class DayX extends Day {
 
+    easeInOutSine(x) {
+        return -(Math.cos(Math.PI * x) - 1) / 2;
+    }
+
     constructor() {
 
         super();
@@ -24,7 +28,7 @@ class DayX extends Day {
         // Define variables here. Runs once during the sketch holder setup
 
 
-        this.calendar = new this.Calendar(this, width / 2, height / 2, 1);
+        this.calendar = new this.Calendar(this, width / 2, height / 2, 1, Math.random() * 360);
         this.newCalendar = null;
         this.newCalendarStartX = null;
         this.newCalendarStartY = null;
@@ -45,10 +49,10 @@ class DayX extends Day {
     }
 
     update() {
-        this.ctx.background(200); // You can delete this line if you want
 
 
 
+        this.ctx.background(this.calendar.background);
         // let scale = (Math.sin(millis() * 0.00001) + 2) / 2;
 
         // this.calendar.scale = scale;
@@ -57,7 +61,7 @@ class DayX extends Day {
 
             if (this.newCalendarSetTime != null) {
 
-                var timeInAnim = (millis() - this.newCalendarSetTime) / 3000.0;
+                var timeInAnim = ((millis() - this.newCalendarSetTime) / 5000.0);
 
                 for (const door of this.calendar.doors) {
                     if (door.day != 25) {
@@ -67,9 +71,12 @@ class DayX extends Day {
 
                 this.newCalendar.x = lerp(this.newCalendarStartX, width / 2, timeInAnim);
                 this.newCalendar.y = lerp(this.newCalendarStartY, height / 2, timeInAnim);
-                this.newCalendar.scale = lerp(this.newCalendarStartScale, 1, timeInAnim);
+                this.newCalendar.scale = (lerp(this.newCalendarStartScale, 1, this.easeInOutSine(timeInAnim)));
 
                 this.calendar.scale = lerp(1, .7, timeInAnim);
+
+                this.ctx.background(lerpColor(this.calendar.background, this.newCalendar.background, this.easeInOutSine(timeInAnim)));
+
 
                 if (timeInAnim >= 1) {
                     this.newCalendarSetTime = null;
@@ -113,7 +120,7 @@ class DayX extends Day {
 
     mousePressed() {
         for (const door of this.calendar.doors) {
-            if (//door.day == this.calendar.currentDay &&
+            if (door.day == this.calendar.currentDay &&
                 door.hitTest(mouseX, mouseY)) {
 
                 this.calendar.currentDay++;
@@ -128,8 +135,14 @@ class DayX extends Day {
                         this,
                         this.calendar.x - this.calendar.w / 2 + door.x + door.w / 2,
                         this.calendar.y - this.calendar.h / 2 + door.y + door.h / 2,
-                        scale
+                        scale,
+                        this.calendar.hue + random([33, 118, 181, 200]),
                     );
+
+                    if (door.childCalendar.elementColorMode == this.calendar.elementColorMode) {
+                        door.childCalendar.elementColorMode = "white";
+                    }
+
                 }
 
             }
@@ -167,7 +180,7 @@ class DayX extends Day {
         HEIGHT = 600;
         CORNER_RADIUS = 10;
 
-        constructor(day, x, y, scale) {
+        constructor(day, x, y, scale, hue) {
             this.day = day;
 
             this.w = this.WIDTH;
@@ -187,11 +200,20 @@ class DayX extends Day {
             randomSeed(this.randomSeed);
 
 
-            this.hue = Math.random() * 360;
+            this.hue = hue;
 
-            this.bgC = color(chroma.oklch(.7765, 0.1808, this.hue).hex());
+            this.background = color(chroma.oklch(.9765, 0.1008, this.hue + 10).hex());
 
+            this.bgC = color(chroma.oklch(.5765, 0.1808, this.hue).hex());
 
+            this.doorBgC = random([
+                chroma.oklch(.5765, 0.1808, this.hue),
+                chroma.oklch(.4654, 0.223, this.hue),
+                chroma.oklch(.5765, 0.1808, this.hue + 180),
+                chroma.oklch(.4654, 0.223, this.hue + 180),
+            ]);
+
+            this.elementColorMode = random(["bright_pastels", "bright_pastels", "bright_pastels", "bright_pastels2", "bright_pastels2", "many_pastels", "few_pastels", "many_pastels", "few_pastels", "white", "bw"])
 
             let days = shuffle([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25]);
             for (let i = 0; i < 5; i++) {
@@ -232,7 +254,46 @@ class DayX extends Day {
 
         }
 
+        getElementColor() {
+            if (this.elementColorMode == "bright_pastels") {
+                return chroma.oklch(.9541, 0.3331, this.hue + random([0, 180]) + random(-1, 1));
+            }
+            else if (this.elementColorMode == "bright_pastels2") {
+                return chroma.oklch(.9541, 0.3331, this.hue + random([0, 120, 240]) + random(-1, 1));
+            }
+            else if (this.elementColorMode == "many_pastels") {
+                return chroma.oklch(.9541, 0.2331, this.hue + random([30, 60, 120, 150, 180, 210, 240, 270, 300, 330]) + random(-3, 3));
+            }
+            else if (this.elementColorMode == "few_pastels") {
+                return chroma.oklch(.9541, 0.2331, this.hue + random([60, 120, 180, 240, 300]) + random(-1, 1));
+            }
+            else if (this.elementColorMode == "white") {
+                return chroma.oklch(.9941, 0.0031, this.hue + random([60, 120, 180, 240, 300]) + random(-1, 1));
+            }
+            else if (this.elementColorMode == "bw") {
+                return random([
+                    chroma.oklch(.9941, 0.0031, this.hue + random([60, 120, 180, 240, 300]) + random(-1, 1)),
+                    chroma.oklch(.2041, 0.0031, this.hue + random([60, 120, 180, 240, 300]) + random(-1, 1)),
+
+                ]);
+            }
+
+        }
+
+        getDoorBgC() {
+            return this.doorBgC;
+        }
+
+
+        getDoorC() {
+            return chroma.oklch(.7765, 0.1808, ((this.hue + random(-5, 5)) % 360));
+        }
+
         DoorV = class {
+
+            easeInOutSine(x) {
+                return -(Math.cos(Math.PI * x) - 1) / 2;
+            }
 
             constructor(calendar, day, x, y, w, h, scale) {
                 this.calendar = calendar;
@@ -242,11 +303,10 @@ class DayX extends Day {
                 this.w = w;
                 this.h = h;
 
-                var hue = (this.calendar.hue + random(0, 30)) % 360;
-                var c = chroma.oklch(.7765, 0.1808, hue);
+                var c = this.calendar.getDoorBgC();
                 this.c = color(c.hex());
 
-                this.doorC = color(chroma.oklch(.5765, 0.1808, hue).hex());
+                this.doorC = color(this.calendar.getDoorC().hex());
 
                 this.openedAmount = 0;
 
@@ -300,7 +360,7 @@ class DayX extends Day {
                     this.drawShape(ctx);
                 }
 
-                ctx.rotateY(-this.openedAmount * (this.day == 25 ? 0.495 : 0.3) * Math.PI * 2);
+                ctx.rotateY(-this.easeInOutSine(this.openedAmount) * (this.day == 25 ? 0.495 : 0.3) * Math.PI * 2);
 
                 //door
 
@@ -408,7 +468,7 @@ class DayX extends Day {
                 const x = w * 0.5;
                 const y = h * 0.5;
 
-                ctx.fill(color(chroma.oklch(.9541, 0.2331, this.calendar.hue + random([30, 60, 120, 150, 180, 210, 240, 270, 300, 330])).hex()));
+                ctx.fill(color(this.calendar.getElementColor().hex()));
 
                 var shape = random(["circle", "square", "triangle", "diamond"]);
                 if (shape == "circle" && !inside) {
@@ -498,3 +558,4 @@ class DayX extends Day {
     }
 
 }
+
